@@ -1,0 +1,53 @@
+version: '3'
+services:
+  # container NGINX
+  web:
+    image: nginx
+    container_name: Nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/usr/share/nginx/html/
+      - ./docker-conf/logs/nginx:/var/log/nginx/
+      - ./docker-conf/nginx.conf:/etc/nginx/conf.d/default.conf
+    command: /bin/bash -c "nginx -g 'daemon off;'"
+    tty: true
+    stdin_open: true
+    links:
+      - php
+
+  # container PHP
+  php:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: PHP7
+    volumes:
+      - ./public:/usr/share/nginx/html/
+
+  # container MYSQL
+  db:
+    image: mysql
+    container_name: Mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+    ports:
+      - "3306:3306"
+
+  # container POSTGRES
+  psql:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+
+  # container ADMINER
+  adminer:
+    image: adminer
+    container_name: Adminer
+    restart: always
+    ports:
+      - 8080:8080
